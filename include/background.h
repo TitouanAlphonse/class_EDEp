@@ -71,6 +71,7 @@ struct background
 
   double Omega0_cdm;      /**< \f$ \Omega_{0 cdm} \f$: cold dark matter */
 
+
   double Omega0_idm; /**< \f$ \Omega_{0 idm} \f$: interacting dark matter with photons, baryons, and idr */
 
 
@@ -107,6 +108,13 @@ struct background
   double Omega0_lambda;    /**< \f$ \Omega_{0_\Lambda} \f$: cosmological constant */
   double Omega0_fld;       /**< \f$ \Omega_{0 de} \f$: fluid */
   double Omega0_scf;       /**< \f$ \Omega_{0 scf} \f$: scalar field */
+  
+  double z_rupt_EDEp;      /**< \f$ z_{rupt EDEp} \f$: breaking redshift */
+  double rho_step_EDEp;    /**< \f$ \rho_{step EDEp} \f$: density of phenomenological early dark energy (EDEp) at z = z_rupt_EDEp */
+  double Omega0_EDEp;      /**< \f$ \Omega_{0 scf} \f$: EDEp */
+  double wl_EDEp;          /**< \f$ w_{l EDEp} \f$: slope of rho_EDEp(z) for z<=z_rupt_EDEp */
+  double we_EDEp;          /**< \f$ w_{e EDEp} \f$: slope of rho_EDEp(z) for z>z_rupt_EDEp */
+  
   short use_ppf; /**< flag switching on PPF perturbation equations instead of true fluid equations for perturbations. It could have been defined inside
                     perturbation structure, but we leave it here in such way to have all fld parameters grouped. */
   double c_gamma_over_c_fld; /**< ppf parameter defined in eq. (16) of 0808.3125 [astro-ph] */
@@ -170,6 +178,7 @@ struct background
   int index_bg_rho_cdm;       /**< cdm density */
   int index_bg_rho_idm;       /**< idm density */
   int index_bg_rho_lambda;    /**< cosmological constant density */
+  int index_bg_rho_EDEp;      /**< EDEp density */
   int index_bg_rho_fld;       /**< fluid density */
   int index_bg_w_fld;         /**< fluid equation of state */
   int index_bg_rho_idr;       /**< density of interacting dark radiation */
@@ -290,6 +299,7 @@ struct background
   short has_scf;       /**< presence of a scalar field? */
   short has_ncdm;      /**< presence of non-cold dark matter? */
   short has_lambda;    /**< presence of cosmological constant? */
+  short has_EDEp;      /**< presence of phenomenological early dark energy? */
   short has_fld;       /**< presence of fluid with constant w and cs2? */
   short has_ur;        /**< presence of ultra-relativistic neutrinos/relics? */
   short has_idr;       /**< presence of interacting dark radiation? */

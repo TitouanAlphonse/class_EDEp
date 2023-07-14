@@ -3,8 +3,10 @@
  */
 
 #include "class.h"
+#include <time.h>
 
 int main(int argc, char **argv) {
+  time_t begin = time( NULL );
 
   struct precision pr;        /* for precision parameters */
   struct background ba;       /* for cosmological background */
@@ -120,6 +122,10 @@ int main(int argc, char **argv) {
     printf("\n\nError in background_free \n=>%s\n",ba.error_message);
     return _FAILURE_;
   }
+
+  time_t end = time( NULL );
+  unsigned long secondes = (unsigned long) difftime( end, begin );
+  printf( "Finished in %ld sec\n", secondes );
 
   return _SUCCESS_;
 

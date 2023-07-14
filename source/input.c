@@ -2465,6 +2465,7 @@ int input_read_parameters_species(struct file_content * pfc,
   }
   class_test(pba->Omega0_cdm<0,errmsg, "You cannot set the cold dark matter density to negative values.");
 
+
   /** 4) (Second part) Omega_0_m (total non-relativistic) */
   class_call(parser_read_double(pfc,"Omega_m",&param1,&flag1,errmsg),
              errmsg,
@@ -2672,6 +2673,38 @@ int input_read_parameters_species(struct file_content * pfc,
 
 
   /* 7) ** ADDITIONAL SPECIES ** --> Add your species here */
+
+
+  /* Phenomenological early dark energy (EDEp) */
+
+  class_call(parser_read_double(pfc,"wl_EDEp",&param1,&flag1,errmsg),
+              errmsg,
+              errmsg);
+  if (flag1 == _TRUE_){
+    pba->wl_EDEp = param1;
+  }
+  class_call(parser_read_double(pfc,"we_EDEp",&param1,&flag1,errmsg),
+              errmsg,
+              errmsg);
+  if (flag1 == _TRUE_){
+    pba->we_EDEp = param1;
+  }
+  class_call(parser_read_double(pfc,"z_rupt_EDEp",&param1,&flag1,errmsg),
+              errmsg,
+              errmsg);
+  if (flag1 == _TRUE_){
+    pba->z_rupt_EDEp = param1;
+  }
+  class_call(parser_read_double(pfc,"rho_step_EDEp",&param1,&flag1,errmsg),
+             errmsg,
+             errmsg);
+  if (flag1 == _TRUE_){
+    pba->rho_step_EDEp = param1;
+    pba->Omega0_EDEp = pba->rho_step_EDEp * pow(1/(1+pba->z_rupt_EDEp),3*(1+pba->wl_EDEp));
+  }
+  
+  class_test(pba->rho_step_EDEp<0,errmsg, "You cannot set the phenomenological early dark energy density to negative values.");
+
 
   /** 7.1) Decaying DM into DR */
   /** 7.1.a) Omega_0_dcdmdr (DCDM, i.e. decaying CDM) */
@@ -3101,6 +3134,7 @@ int input_read_parameters_species(struct file_content * pfc,
   if (has_m_budget == _TRUE_) {
     pba->Omega0_cdm = Omega_m_remaining;
   }
+  
 
   /* When the CDM density is determined we can use the previously collected fractions to determine the corresponding densities. First, make sure everything is reasonable*/
   class_test((f_idm > 0.) && (pba->Omega0_cdm == 0.),
@@ -3130,6 +3164,7 @@ int input_read_parameters_species(struct file_content * pfc,
   /** 8) Dark energy
       Omega_0_lambda (cosmological constant), Omega0_fld (dark energy
       fluid), Omega0_scf (scalar field) */
+
   /* Read */
   class_call(parser_read_double(pfc,"Omega_Lambda",&param1,&flag1,errmsg),
              errmsg,
@@ -3156,6 +3191,7 @@ int input_read_parameters_species(struct file_content * pfc,
      2) go through the components in order {lambda, fld, scf} and fill using
      first unspecified component. */
 
+
   /* ** BUDGET EQUATION ** -> Add your species here */
   /* Compute Omega_tot */
   Omega_tot = pba->Omega0_g;
@@ -3166,6 +3202,7 @@ int input_read_parameters_species(struct file_content * pfc,
   Omega_tot += pba->Omega0_dcdmdr;
   Omega_tot += pba->Omega0_idr;
   Omega_tot += pba->Omega0_ncdm_tot;
+  Omega_tot += pba->Omega0_EDEp;
   /* Step 1 */
   if (flag1 == _TRUE_){
     pba->Omega0_lambda = param1;
@@ -3311,7 +3348,6 @@ int input_read_parameters_species(struct file_content * pfc,
       printf("'scf_lambda' = %e < 3 won't be tracking (for exp quint) unless overwritten by tuning function.",scf_lambda);
     }
   }
-
   return _SUCCESS_;
 
 }
@@ -5691,7 +5727,7 @@ int input_default_params(struct background *pba,
   ppt->three_cvis2_ur=1.;
 
   /** 4) CDM density */
-  pba->Omega0_cdm = 0.1201075/pow(pba->h,2);
+  pba->Omega0_cdm = 0.1201075/pow(pba->h,2)/2;
 
   /** 5) ncdm sector */
   /** 5.a) Number of distinct species */
@@ -5766,7 +5802,12 @@ int input_default_params(struct background *pba,
   /** 9) Dark energy contributions */
   pba->Omega0_fld = 0.;
   pba->Omega0_scf = 0.;
-  pba->Omega0_lambda = 1.-pba->Omega0_k-pba->Omega0_g-pba->Omega0_ur-pba->Omega0_b-pba->Omega0_cdm-pba->Omega0_ncdm_tot-pba->Omega0_dcdmdr - pba->Omega0_idr -pba->Omega0_idm;
+  pba->Omega0_lambda = 1.-pba->Omega0_k-pba->Omega0_g-pba->Omega0_ur-pba->Omega0_b-pba->Omega0_cdm-pba->Omega0_ncdm_tot-pba->Omega0_dcdmdr-pba->Omega0_idr-pba->Omega0_idm-pba->Omega0_EDEp;
+  pba->z_rupt_EDEp = 5000;
+  pba->wl_EDEp = 1./3;
+  pba->we_EDEp = -1;
+  pba->rho_step_EDEp = 1e2;
+  pba->Omega0_EDEp = 0;
   /** 8.a) Omega fluid */
   /** 8.a.1) PPF approximation */
   pba->use_ppf = _TRUE_;

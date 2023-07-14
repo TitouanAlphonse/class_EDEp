@@ -536,6 +536,22 @@ int background_functions(
     p_tot -= pvecback[pba->index_bg_rho_lambda];
   }
 
+  /* Phenomenological early dark energy (EDEp) */
+  if (pba->has_EDEp == _TRUE_) {
+    double a_rupt=1/(1+pba->z_rupt_EDEp);
+    
+    if (a>=a_rupt) {
+      pvecback[pba->index_bg_rho_EDEp] = pba->rho_step_EDEp * pow(a_rupt,3*(1+pba->wl_EDEp)) / pow(a,3*(1+pba->wl_EDEp));
+      p_tot += pba->wl_EDEp * pvecback[pba->index_bg_rho_EDEp];
+    }
+    else {
+      pvecback[pba->index_bg_rho_EDEp] = pba->rho_step_EDEp * pow(a_rupt,3*(1+pba->we_EDEp)) / pow(a,3*(1+pba->we_EDEp));
+      p_tot += pba->we_EDEp * pvecback[pba->index_bg_rho_EDEp];
+    }
+    
+    rho_tot += pvecback[pba->index_bg_rho_EDEp];
+  }
+
   /* fluid with w(a) and constant cs2 */
   if (pba->has_fld == _TRUE_) {
 
@@ -978,6 +994,7 @@ int background_indices(
   pba->has_dr = _FALSE_;
   pba->has_scf = _FALSE_;
   pba->has_lambda = _FALSE_;
+  pba->has_EDEp = _FALSE_;
   pba->has_fld = _FALSE_;
   pba->has_ur = _FALSE_;
   pba->has_idr = _FALSE_;
@@ -1004,6 +1021,9 @@ int background_indices(
 
   if (pba->Omega0_lambda != 0.)
     pba->has_lambda = _TRUE_;
+  
+  if (pba->rho_step_EDEp != 0.)
+    pba->has_EDEp = _TRUE_;
 
   if (pba->Omega0_fld != 0.)
     pba->has_fld = _TRUE_;
@@ -1071,6 +1091,9 @@ int background_indices(
 
   /* - index for Lambda */
   class_define_index(pba->index_bg_rho_lambda,pba->has_lambda,index_bg,1);
+
+  /* - index for EDEp */
+  class_define_index(pba->index_bg_rho_EDEp,pba->has_EDEp,index_bg,1);
 
   /* - index for fluid */
   class_define_index(pba->index_bg_rho_fld,pba->has_fld,index_bg,1);
@@ -2447,6 +2470,7 @@ int background_output_titles(
     }
   }
   class_store_columntitle(titles,"(.)rho_lambda",pba->has_lambda);
+  class_store_columntitle(titles,"(.)rho_EDEp",pba->has_EDEp);
   class_store_columntitle(titles,"(.)rho_fld",pba->has_fld);
   class_store_columntitle(titles,"(.)w_fld",pba->has_fld);
   class_store_columntitle(titles,"(.)rho_ur",pba->has_ur);
@@ -2520,6 +2544,7 @@ int background_output_data(
       }
     }
     class_store_double(dataptr,pvecback[pba->index_bg_rho_lambda],pba->has_lambda,storeidx);
+    class_store_double(dataptr,pvecback[pba->index_bg_rho_EDEp],pba->has_EDEp,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_fld],pba->has_fld,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_w_fld],pba->has_fld,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_ur],pba->has_ur,storeidx);
@@ -2835,12 +2860,16 @@ int background_output_budget(
       budget_radiation+=pba->Omega0_idr;
     }
 
-    if ((pba->has_lambda == _TRUE_) || (pba->has_fld == _TRUE_) || (pba->has_scf == _TRUE_) || (pba->has_curvature == _TRUE_)) {
+    if ((pba->has_lambda == _TRUE_) || (pba->has_fld == _TRUE_) || (pba->has_scf == _TRUE_) || (pba->has_curvature == _TRUE_) || (pba->has_EDEp == _TRUE_)) {
       printf(" ---> Other Content \n");
     }
     if (pba->has_lambda == _TRUE_) {
       class_print_species("Cosmological Constant",lambda);
       budget_other+=pba->Omega0_lambda;
+    }
+    if (pba->has_EDEp == _TRUE_) {
+      class_print_species("Phenomenological Early Dark Energy",EDEp);
+      budget_other+=pba->Omega0_EDEp;
     }
     if (pba->has_fld == _TRUE_) {
       class_print_species("Dark Energy Fluid",fld);
