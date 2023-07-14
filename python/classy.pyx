@@ -1605,6 +1605,28 @@ cdef class Class:
         f(z)*sigma8(z) (dimensionless)
         """
         return self.scale_independent_growth_factor_f(z)*self.sigma(8,z,h_units=True)
+    
+    def get_z_rupt_EDEp(self):
+        self.compute(["background"])
+        return self.ba.z_rupt_EDEp
+    
+    def get_f_EDEp(self):
+        cdef int last_index #junk
+        cdef double * pvecback
+
+        cdef double z_rupt=self.get_z_rupt_EDEp()
+
+        pvecback = <double*> calloc(self.ba.bg_size,sizeof(double))
+
+        if background_at_z(&self.ba,z_rupt,long_info,inter_normal,&last_index,pvecback)==_FAILURE_:
+            raise CosmoSevereError(self.ba.error_message)
+
+        f_EDEp = pvecback[self.ba.index_bg_rho_EDEp]/pvecback[self.ba.index_bg_rho_tot]
+
+        free(pvecback)
+
+        return f_EDEp
+    
 
     #################################
     # gives an estimation of f(z)*sigma8(z) at the scale of 8 h/Mpc, computed as (d sigma8/d ln a)

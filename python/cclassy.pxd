@@ -72,6 +72,8 @@ cdef extern from "class.h":
         int index_bg_rho_cdm
         int index_bg_rho_ncdm1
         int index_bg_rho_crit
+        int index_bg_rho_tot
+        int index_bg_rho_EDEp
         short has_cdm
         short  has_ncdm
         int N_ncdm
@@ -109,6 +111,7 @@ cdef extern from "class.h":
         double H_eq
         double z_eq
         double tau_eq
+        double z_rupt_EDEp
 
     cdef struct thermodynamics:
         ErrorMsg error_message
