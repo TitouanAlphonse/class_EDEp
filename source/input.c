@@ -2695,15 +2695,33 @@ int input_read_parameters_species(struct file_content * pfc,
   if (flag1 == _TRUE_){
     pba->z_rupt_EDEp = param1;
   }
+  
   class_call(parser_read_double(pfc,"rho_step_EDEp",&param1,&flag1,errmsg),
              errmsg,
              errmsg);
+  class_call(parser_read_double(pfc,"f_rupt_EDEp",&param2,&flag2,errmsg),
+             errmsg,
+             errmsg);
+  class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
+             errmsg,
+             "You can only enter one of 'rho_step_EDEp' or 'f_rupt_EDEp'.");
+  short rho_EDEp_inputted = _FALSE_;
+  short f_EDEp_inputted = _FALSE_;
   if (flag1 == _TRUE_){
     pba->rho_step_EDEp = param1;
-    pba->Omega0_EDEp = pba->rho_step_EDEp * pow(1/(1+pba->z_rupt_EDEp),3*(1+pba->wl_EDEp));
+    pba->Omega0_EDEp = pba->  rho_step_EDEp / pow(pba->H0,2) * pow(1/(1+pba->z_rupt_EDEp),3*(1+pba->wl_EDEp));
+    rho_EDEp_inputted = _TRUE_;
+    f_EDEp_inputted = _FALSE_;
+  }
+  if (flag2 == _TRUE_){
+    pba->f_rupt_EDEp = param2;
+    rho_EDEp_inputted = _FALSE_;
+    f_EDEp_inputted = _TRUE_;
   }
   
   class_test(pba->rho_step_EDEp<0,errmsg, "You cannot set the phenomenological early dark energy density to negative values.");
+  class_test(pba->rho_step_EDEp<0,errmsg, "You cannot set the fraction of phenomenological early dark energy to negative values.");
+  class_test(pba->rho_step_EDEp<0,errmsg, "You cannot set the fraction of phenomenological early dark energy to values greater than 1.");
 
 
   /** 7.1) Decaying DM into DR */
@@ -3238,6 +3256,17 @@ int input_read_parameters_species(struct file_content * pfc,
       printf(" -> matched budget equations by adjusting Omega_scf = %g\n",pba->Omega0_scf);
     }
   }
+  
+  /* Compute the missing values of EDEp parameters (only considering baryons, cdm, ultra relativistic species and photons) */
+  if (f_EDEp_inputted == _TRUE_) {
+    pba->Omega0_EDEp = (1+(pba->Omega0_b+pba->Omega0_cdm)*(pow(1+pba->z_rupt_EDEp,3)-1)+(pba->Omega0_g+pba->Omega0_ur)*(pow(1+pba->z_rupt_EDEp,4)-1))/(1-(1-1/pba->f_rupt_EDEp)*pow(1+pba->z_rupt_EDEp,3*(1+pba->wl_EDEp)));
+    pba->Omega0_lambda = 1 - pba->Omega0_b - pba->Omega0_cdm - pba->Omega0_g - pba->Omega0_ur - pba->Omega0_EDEp;
+    pba->rho_step_EDEp = pba->Omega0_EDEp * pow(pba->H0,2) * pow(1+pba->z_rupt_EDEp,3*(1+pba->wl_EDEp));
+  }
+  if (rho_EDEp_inputted) {
+    pba->f_rupt_EDEp = pba->rho_step_EDEp / (Omega_tot * pow(pba->H0,2));
+  }
+  
 
   /* ** END OF BUDGET EQUATION ** */
 
@@ -5808,6 +5837,7 @@ int input_default_params(struct background *pba,
   pba->we_EDEp = -1;
   pba->rho_step_EDEp = 1e2;
   pba->Omega0_EDEp = 0;
+  pba->f_rupt_EDEp=0.1;
   /** 8.a) Omega fluid */
   /** 8.a.1) PPF approximation */
   pba->use_ppf = _TRUE_;

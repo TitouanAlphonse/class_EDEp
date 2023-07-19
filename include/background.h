@@ -112,6 +112,7 @@ struct background
   double z_rupt_EDEp;      /**< \f$ z_{rupt EDEp} \f$: breaking redshift */
   double rho_step_EDEp;    /**< \f$ \rho_{step EDEp} \f$: density of phenomenological early dark energy (EDEp) at z = z_rupt_EDEp */
   double Omega0_EDEp;      /**< \f$ \Omega_{0 scf} \f$: EDEp */
+  double f_rupt_EDEp;      /**< \f$ f_{EDEp} \f$: fraction of EDEp at z = z_rupt_EDEp */
   double wl_EDEp;          /**< \f$ w_{l EDEp} \f$: slope of rho_EDEp(z) for z<=z_rupt_EDEp */
   double we_EDEp;          /**< \f$ w_{e EDEp} \f$: slope of rho_EDEp(z) for z>z_rupt_EDEp */
   
