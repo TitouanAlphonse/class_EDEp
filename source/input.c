@@ -2695,7 +2695,7 @@ int input_read_parameters_species(struct file_content * pfc,
     pba->rho_step_EDEp = param1;
     pba->Omega0_EDEp = pba->rho_step_EDEp / pow(pba->H0,2) * pow(1/(1+pba->z_rupt_EDEp),3*(1+pba->wl_EDEp));
   }
-  if (flag2 == _TRUE_){
+  if (f_EDEp_inputted == _TRUE_){
     pba->f_rupt_EDEp = param2;
   }
 
